@@ -1,0 +1,14 @@
+out/icons
+src/icons/Duocolor icons/**/*.tsx
+src/icons/Duocolor icons/**/*.jsx
+src/icons/Duocolor icons/**/*.jsx.map
+src/icons/Duotone icons/**/*.tsx
+src/icons/Duotone icons/**/*.jsx
+src/icons/Duotone icons/**/*.jsx.map
+src/icons/Line icons/**/*.tsx
+src/icons/Line icons/**/*.jsx
+src/icons/Line icons/**/*.jsx.map
+src/icons/Solid icons/**/*.tsx
+src/icons/Solid icons/**/*.jsx
+src/icons/Solid icons/**/*.jsx.map
+node_modules

@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "./out",
+        "jsx": "react-jsx",
+        "jsxImportSource": "react",
+        "module": "commonjs",
+        "target": "ES2020",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "sourceMap": true,
+        "declaration": true
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+} 

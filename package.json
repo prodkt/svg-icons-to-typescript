@@ -1,0 +1,80 @@
+{
+    "name": "svg-to-react-typescript",
+    "displayName": "SVG to React Icons Converter",
+    "description": "Convert SVG files to React components",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.75.0"
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/prodkt/svg-to-react-typescript.git"
+    },
+    "galleryBanner": {
+      "color": "#2C2C32",
+      "theme": "dark"
+    },
+    "homepage": "https://github.com/prodkt/svg-to-react-typescript",
+    "sponsor": {
+      "url": "https://github.com/sponsors/prodkt"
+    },
+    "funding": [
+      {
+        "type": "github",
+        "url": "https://github.com/sponsors/prodkt"
+      }
+    ],
+    "bugs": {
+      "url": "https://github.com/prodkt/svg-to-react-typescript/issues"
+    },
+    "categories": [
+      "Snippets",
+      "Formatters",
+      "Other"
+    ],
+    "keywords": [
+      "svg",
+      "react",
+      "component",
+      "converter",
+      "jsx",
+      "tsx",
+      "transformation",
+      "icon"
+    ],
+    "tags": [
+      "svg",
+      "react",
+      "jsx",
+      "tsx",
+      "component"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "svgr.batchConvert",
+                "title": "SVGR: Batch Convert SVGs to React Components"
+            }
+        ]
+    },
+    "scripts": {
+        "script-convert": "npx ts-node src/convert-script.ts",
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./"
+    },
+    "devDependencies": {
+        "@types/mocha": "^10.0.7",
+        "@types/node": "20.x",
+        "@types/react": "^19.0.2",
+        "@types/vscode": "^1.51.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "ts-loader": "^9.5.1",
+        "ts-node": "^10.9.1",
+        "typescript": "^5.5.4"
+    },
+    "license": "MIT",
+    "packageManager": "pnpm@9.14.4+sha512.c8180b3fbe4e4bca02c94234717896b5529740a6cbadf19fa78254270403ea2f27d4e1d46a08a0f56c89b63dc8ebfd3ee53326da720273794e6200fcf0d184ab"
+}
