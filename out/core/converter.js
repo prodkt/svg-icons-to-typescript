@@ -37,6 +37,7 @@ exports.processFolder = processFolder;
 exports.convertSvgToReact = convertSvgToReact;
 const promises_1 = require("node:fs/promises");
 const path = __importStar(require("node:path"));
+const name_converter_1 = require("./name-converter");
 // Constants
 const SVG_EXTENSION = ".svg";
 const TSX_EXTENSION = ".tsx";
@@ -51,13 +52,15 @@ async function processFolder(inputFolderPath, outputFolderPath) {
         const entries = await (0, promises_1.readdir)(inputFolderPath, { withFileTypes: true });
         for (const entry of entries) {
             const inputPath = path.join(inputFolderPath, entry.name);
-            const outputPath = path.join(outputFolderPath, entry.name);
             if (entry.isDirectory()) {
+                const outputPath = path.join(outputFolderPath, entry.name);
                 await processFolder(inputPath, outputPath);
             }
             else if (entry.isFile() && entry.name.endsWith(SVG_EXTENSION)) {
-                const newPath = outputPath.replace(SVG_EXTENSION, TSX_EXTENSION);
-                await convertSvgToReact(inputPath, newPath);
+                // Convert Figma filename to clean output filename
+                const cleanFilename = (0, name_converter_1.convertFigmaFilenameToOutputFilename)(entry.name);
+                const outputPath = path.join(outputFolderPath, cleanFilename);
+                await convertSvgToReact(inputPath, outputPath);
             }
         }
     }
@@ -75,7 +78,9 @@ async function convertSvgToReact(oldPath, newPath) {
         if (!svgContent.trim()) {
             throw new Error("SVG file is empty");
         }
-        const reactComponent = createReactComponent(svgContent, newPath);
+        // Extract original filename for proper title generation
+        const originalFilename = path.basename(oldPath);
+        const reactComponent = createReactComponent(svgContent, newPath, originalFilename);
         await (0, promises_1.writeFile)(newPath, reactComponent);
         console.log(`Converted ${oldPath} to ${newPath}`);
     }
@@ -85,21 +90,22 @@ async function convertSvgToReact(oldPath, newPath) {
     }
 }
 /**
- * Gera o nome do componente baseado no nome do arquivo
+ * Generates the component name based on the file path
+ * Uses the new Figma filename conversion logic
  */
 function getComponentName(filePath) {
-    const fileName = filePath.split(/[\/\\]/).pop()?.split(".")[0] || "SvgComponent";
-    return fileName.split(/[-_]/).map(capitalizeFirstLetter).join("");
+    const fileName = filePath.split(/[\/\\]/).pop() || "SvgComponent";
+    const componentName = (0, name_converter_1.convertFigmaFilenameToComponentName)(fileName);
+    // Validate the component name
+    if (!(0, name_converter_1.isValidComponentName)(componentName)) {
+        console.warn(`Invalid component name generated: ${componentName}, using fallback`);
+        return "SvgComponent";
+    }
+    return componentName;
 }
-/**
- * Capitaliza a primeira letra de uma string
- */
 function capitalizeFirstLetter(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
-/**
- * Remove atributos desnecessários do SVG e normaliza o espaçamento
- */
 function removeUnnecessaryAttributes(svg) {
     return svg
         .replace(/<\?xml[^>]*\?>/g, "")
@@ -113,34 +119,22 @@ function removeUnnecessaryAttributes(svg) {
         .join("\n")
         .trim();
 }
-/**
- * Prepara a tag SVG adicionando suporte a props
- */
 function prepareSvgTag(svg) {
     return svg.replace(">", " {...props}>");
 }
-/**
- * Processa a tag SVG removendo atributos desnecessários e adicionando suporte a props
- */
-function processSvgTag(svg, componentName) {
+function processSvgTag(svg, componentName, originalFilename) {
     const cleanedSvg = removeUnnecessaryAttributes(svg);
-    // Extract the opening svg tag and the rest of the content
     const [svgTag, ...rest] = cleanedSvg.split('>');
     const content = rest.join('>');
-    // Add props to the svg tag and insert the title as the first child
-    return `${svgTag} {...props}>\n      <title>${componentName}</title>${content}`;
+    // Use the original filename to create a proper title
+    const title = (0, name_converter_1.convertFigmaFilenameToTitle)(originalFilename);
+    return `${svgTag} {...props}>\n      <title>${title}</title>${content}`;
 }
-/**
- * Converte o conteúdo SVG para JSX
- */
-function convertSvgToJsx(svg, componentName) {
-    let jsxSvg = processSvgTag(svg, componentName);
+function convertSvgToJsx(svg, componentName, originalFilename) {
+    let jsxSvg = processSvgTag(svg, componentName, originalFilename);
     jsxSvg = convertAttributes(jsxSvg);
     return indentJsx(jsxSvg);
 }
-/**
- * Converte os atributos SVG para JSX
- */
 function convertAttributes(svg) {
     return svg.replace(ATTRIBUTE_REGEX, (_, attr, value) => {
         if (ARIA_REGEX.test(attr)) {
@@ -165,9 +159,6 @@ function convertAttributes(svg) {
         return `${camelAttr}="${value}"`;
     });
 }
-/**
- * Converte o atributo style para o formato JSX
- */
 function convertStyleAttribute(styleValue) {
     const styleObject = styleValue.split(";")
         .filter((s) => s.trim())
@@ -178,29 +169,23 @@ function convertStyleAttribute(styleValue) {
         .join(", ");
     return `style={{${styleObject}}}`;
 }
-/**
- * Converte uma string de kebab-case para camelCase
- */
 function toCamelCase(str) {
     return str.replace(KEBAB_CASE_REGEX, (_, letter) => letter.toUpperCase());
 }
-/**
- * Indenta o JSX gerado
- */
 function indentJsx(jsx) {
     return jsx
         .split('\n')
         .map((line) => `    ${line.trim()}`)
         .join('\n');
 }
-// ... rest of your existing utility functions ...
 function validateSvgContent(svgContent) {
     const svgRegex = /<svg[^>]*>[\s\S]*<\/svg>/;
     return svgRegex.test(svgContent);
 }
-function createReactComponent(svgContent, filePath) {
-    const componentName = getComponentName(filePath);
-    const jsxElement = convertSvgToJsx(svgContent, componentName);
+function createReactComponent(svgContent, filePath, originalFilename) {
+    // Use the original filename to generate the component name, not the output file path
+    const componentName = (0, name_converter_1.convertFigmaFilenameToComponentName)(originalFilename);
+    const jsxElement = convertSvgToJsx(svgContent, componentName, originalFilename);
     const isTypeScript = filePath.endsWith(TSX_EXTENSION);
     const propsType = isTypeScript ? ": SVGProps<SVGSVGElement>" : "";
     const importStatement = 'import React from "react";\nimport type { SVGProps } from "react";\n\n';
@@ -213,5 +198,4 @@ ${jsxElement}
 export default ${componentName};
 `;
 }
-// ... rest of your existing utility functions ... 
 //# sourceMappingURL=converter.js.map

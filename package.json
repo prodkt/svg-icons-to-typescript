@@ -54,15 +54,70 @@
         "commands": [
             {
                 "command": "svgr.batchConvert",
-                "title": "SVGR: Batch Convert SVGs to React Components"
+                "title": "SVGR: Batch Convert SVGs to React Components",
+                "category": "SVG Converter"
+            },
+            {
+                "command": "svgr.convertFile",
+                "title": "Convert SVG to React Component",
+                "category": "SVG Converter"
+            },
+            {
+                "command": "svgr.convertFolder",
+                "title": "Convert Folder SVGs to React Components",
+                "category": "SVG Converter"
             }
+        ],
+        "menus": {
+            "explorer/context": [
+                {
+                    "command": "svgr.convertFile",
+                    "when": "resourceExtname == '.svg'",
+                    "group": "7_modification"
+                },
+                {
+                    "command": "svgr.convertFolder",
+                    "when": "resourceScheme == 'file'",
+                    "group": "7_modification"
+                }
+            ],
+            "commandPalette": [
+                {
+                    "command": "svgr.batchConvert",
+                    "when": "true"
+                },
+                {
+                    "command": "svgr.convertFile",
+                    "when": "resourceExtname == '.svg'"
+                },
+                {
+                    "command": "svgr.convertFolder",
+                    "when": "resourceScheme == 'file'"
+                }
+            ]
+        },
+        "activationEvents": [
+            "onCommand:svgr.batchConvert",
+            "onCommand:svgr.convertFile",
+            "onCommand:svgr.convertFolder"
         ]
     },
     "scripts": {
-        "script-convert": "npx ts-node src/convert-script.ts",
-        "vscode:prepublish": "npm run compile",
+        "build": "npm run compile",
         "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./"
+        "watch": "tsc -watch -p ./",
+        "clean": "rm -rf out/",
+        "dev": "npm run watch",
+        "test": "npm run script-widgli",
+        "convert": "npm run script-convert",
+        "convert:widgli": "npm run script-widgli",
+        "example": "npx ts-node src/example-script.ts",
+        "script-convert": "npx ts-node src/convert-script.ts",
+        "script-widgli": "npx ts-node src/widgli-script.ts",
+        "vscode:prepublish": "npm run compile",
+        "package": "npm run compile && vsce package",
+        "publish": "npm run compile && vsce publish",
+        "install-extension": "code --install-extension svg-to-react-typescript-0.0.1.vsix"
     },
     "devDependencies": {
         "@types/mocha": "^10.0.7",
@@ -73,7 +128,8 @@
         "react-dom": "^19.0.0",
         "ts-loader": "^9.5.1",
         "ts-node": "^10.9.1",
-        "typescript": "^5.5.4"
+        "typescript": "^5.5.4",
+        "@vscode/vsce": "^2.22.0"
     },
     "license": "MIT",
     "packageManager": "pnpm@9.14.4+sha512.c8180b3fbe4e4bca02c94234717896b5529740a6cbadf19fa78254270403ea2f27d4e1d46a08a0f56c89b63dc8ebfd3ee53326da720273794e6200fcf0d184ab"
